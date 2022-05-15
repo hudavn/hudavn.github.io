@@ -18,17 +18,17 @@
 
 
 
-<meta property="og:title" content="Welcome to my stories" />
-<meta property="og:description" content="" />
+<meta property="og:title" content="System Design for Blog with Massive Users" />
+<meta property="og:description" content="Một bài tập và là một vấn đề vô cùng thú vị trong những ngày đầu của hành trình Fresher tại ZaloPay - VNG." />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="https://hudavn.github.io/blogs/new-post/" /><meta property="article:section" content="blogs" />
-<meta property="article:published_time" content="2022-05-15T16:30:24+07:00" />
-<meta property="article:modified_time" content="2022-05-15T16:30:24+07:00" /><meta property="og:site_name" content="Dat N. Stories" />
+<meta property="og:url" content="https://hudavn.github.io/blogs/001/" /><meta property="article:section" content="blogs" />
+<meta property="article:published_time" content="2022-05-16T01:39:17+07:00" />
+<meta property="article:modified_time" content="2022-05-16T01:39:17+07:00" /><meta property="og:site_name" content="Dat N. Stories" />
 
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Welcome to my stories"/>
-<meta name="twitter:description" content=""/>
+<meta name="twitter:title" content="System Design for Blog with Massive Users"/>
+<meta name="twitter:description" content="Một bài tập và là một vấn đề vô cùng thú vị trong những ngày đầu của hành trình Fresher tại ZaloPay - VNG."/>
 
 
 
@@ -74,7 +74,7 @@
 <script defer src="/fontawesome-5/all-5.15.4.js"></script>
 
   <title>
-Welcome to my stories | Dat N. Stories
+System Design for Blog with Massive Users | Dat N. Stories
 
   </title>
 </head>
@@ -210,16 +210,43 @@ Welcome to my stories | Dat N. Stories
       <div class="col-sm-12 col-md-12 col-lg-9">
         <div class="pr-lg-4">
           <div class="title mb-5">
-            <h1 class="text-center mb-4">Welcome to my stories</h1>
+            <h1 class="text-center mb-4">System Design for Blog with Massive Users</h1>
             <div class="text-center">
                
               <small>|</small>
-              May 15, 2022
+              May 16, 2022
             </div>
           </div>
           
           <article class="page-content">
-          
+          <p>Một bài tập và là một vấn đề vô cùng thú vị trong những ngày đầu của hành trình Fresher tại ZaloPay - VNG.</p>
+<h2 id="problem-statement">Problem statement</h2>
+<p>Câu chuyện về ZaloPay hay VNG mình xin phép được kể sau ở những bài viết khác. Hiện tại, mình sẽ chỉ tập trung vào phần giải quyết vấn đề đã đặt ra ở tiêu đề hơn là kể chuyện, và nó cũng chính là một trong những bài tập của tuần training đầu tiên tại ZaloPay.</p>
+<blockquote>
+<p>Imagine you have to design a system for serving blogs to massive readers (10k tps). How would you design the system?</p>
+</blockquote>
+<h2 id="analysis">Analysis</h2>
+<p>10k <em>tps</em>? <em>tps</em> ở đây là gì nhỉ? 10k users à?</p>
+<p>Sau một hồi tìm hiểu thì mình biết rằng tps nó có các ý nghĩa khác nhau trong các lĩnh vực khác nhau và ở đây mình hiểu rằng nó chính là từ viết tắt của <em>Transaction Per Second</em>.</p>
+<p>Vì vậy, vấn đề ở đây đặt ra rằng system của chúng ta phải handle được tầm 10k truy vấn/transaction đồng thời, tức là phục vụ cho khoảng 10,000 người như các bạn ở đây cùng đọc tại một thời điểm.</p>
+<p>Ta sẽ cùng nhau trả lời một số câu hỏi để có cái nhìn tổng quan hơn về hệ thống mà ta đang muốn thiết kế.</p>
+<ol>
+<li><em>Who is going to use it?</em> Các bạn, các đọc giả thân yêu của tôi 😊</li>
+<li><em>How are they going to use it?</em> Truy cập, lướt, đọc, điều hướng, lặp lại.</li>
+<li><em>How many users are there?</em> Sure là phải hơn số lượng 10k tps, cứ cho là 100,000 - 1M users nhé 😗</li>
+<li><em>What does the system do?</em> Gửi/nhận các request từ người dùng, lưu trữ/cập nhật dữ liệu bài viết, xử lí lượng lớn truy vấn, v.v.</li>
+<li><em>What are the inputs and outputs of the system?</em> Đầu vào là truy vấn từ người dùng, đầu ra là nội dung của trang web, bài viết tương ứng với truy vấn.</li>
+<li><em>How much data do we expect to handle?</em> Blog cá nhân, mình viết đến năm 100 tuổi thì ước chừng 1TB chắc là đủ (bao gồm cả text, script, hình ảnh, &hellip;)</li>
+<li><em>How many requests per second do we expect?</em> 10,000 tps</li>
+<li><em>What is the expected read to write ratio?</em> 10000:1</li>
+</ol>
+<p>Kì vọng cho system của chúng ta, mình sẽ tóm gọn như sau:</p>
+<ul>
+<li><strong>Scalability</strong>: có khả năng đáp ứng và xử lí lượng lớn user với tốc độ ổn định.</li>
+<li><strong>Availability</strong>: luôn có thứ để hiển thị cho user, có thể không phải là nội dung mới nhất nhưng vẫn đảm bảo việc luôn hiển thị cho user.</li>
+<li><strong>Partition Tolerance</strong>: hệ thống vẫn tiếp tục hoạt động trong trường hợp có lỗi xảy ra.</li>
+</ul>
+<h2 id="solution">Solution</h2>
           </article>
         </div>
       </div>
@@ -231,11 +258,30 @@ Welcome to my stories | Dat N. Stories
                 Table Of Contents
               </h5>
               <div class="toc-content">
-                <nav id="TableOfContents"></nav>
+                <nav id="TableOfContents">
+  <ul>
+    <li><a href="#problem-statement">Problem statement</a></li>
+    <li><a href="#analysis">Analysis</a></li>
+    <li><a href="#solution">Solution</a></li>
+  </ul>
+</nav>
               </div>
           </aside>
           
 
+          
+          <aside class="tags">
+            <h5>Tags</h5>
+            <ul class="tags-ul list-unstyled list-inline">
+              
+              <li class="list-inline-item"><a href="https://hudavn.github.io/tags/blog" target="_blank">blog</a></li>
+              
+              <li class="list-inline-item"><a href="https://hudavn.github.io/tags/story" target="_blank">story</a></li>
+              
+              <li class="list-inline-item"><a href="https://hudavn.github.io/tags/research" target="_blank">research</a></li>
+              
+            </ul>
+          </aside>
           
           
         </div>
