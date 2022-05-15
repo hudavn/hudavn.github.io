@@ -6,7 +6,16 @@
     <description>Recent content on Dat N. Stories</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 15 May 2022 16:30:24 +0700</lastBuildDate><atom:link href="https://hudavn.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 16 May 2022 01:39:17 +0700</lastBuildDate><atom:link href="https://hudavn.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>System Design for Blog with 10k Users</title>
+      <link>https://hudavn.github.io/blogs/system-design-for-blog-with-10k-users/</link>
+      <pubDate>Mon, 16 May 2022 01:39:17 +0700</pubDate>
+      
+      <guid>https://hudavn.github.io/blogs/system-design-for-blog-with-10k-users/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Welcome to my stories</title>
       <link>https://hudavn.github.io/blogs/hello-world/</link>
