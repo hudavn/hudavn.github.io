@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Blogs on Dat N. Stories</title>
-    <link>https://hudavn.github.io/blogs/</link>
-    <description>Recent content in Blogs on Dat N. Stories</description>
+    <title>blog on Dat N. Stories</title>
+    <link>https://hudavn.github.io/tags/blog/</link>
+    <description>Recent content in blog on Dat N. Stories</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sun, 15 May 2022 16:30:24 +0700</lastBuildDate><atom:link href="https://hudavn.github.io/blogs/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 15 May 2022 16:30:24 +0700</lastBuildDate><atom:link href="https://hudavn.github.io/tags/blog/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Welcome to my stories</title>
       <link>https://hudavn.github.io/blogs/hello-world/</link>
