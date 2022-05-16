@@ -227,7 +227,7 @@ System Design for Blog with Massive Users | Dat N. Stories
 </blockquote>
 <h2 id="analysis">Analysis</h2>
 <p>10k <em>tps</em>? <em>tps</em> ở đây là gì nhỉ? 10k users à?</p>
-<p>Sau một hồi tìm hiểu thì mình biết rằng tps nó có các ý nghĩa khác nhau trong các lĩnh vực khác nhau và ở đây mình hiểu rằng nó chính là từ viết tắt của <em>Transaction Per Second</em>.</p>
+<p>Sau một hồi tìm hiểu thì mình biết rằng <em>tps</em> có các ý nghĩa khác nhau trong các lĩnh vực khác nhau và ở đây ta hiểu <em>tps</em> chính là từ viết tắt của <em>Transaction Per Second</em>.</p>
 <p>Vì vậy, vấn đề ở đây đặt ra rằng system của chúng ta phải handle được tầm 10k truy vấn/transaction đồng thời, tức là phục vụ cho khoảng 10,000 người như các bạn ở đây cùng đọc tại một thời điểm.</p>
 <p>Ta sẽ cùng nhau trả lời một số câu hỏi để có cái nhìn tổng quan hơn về hệ thống mà ta đang muốn thiết kế.</p>
 <ol>
@@ -247,6 +247,33 @@ System Design for Blog with Massive Users | Dat N. Stories
 <li><strong>Partition Tolerance</strong>: hệ thống vẫn tiếp tục hoạt động trong trường hợp có lỗi xảy ra.</li>
 </ul>
 <h2 id="solution">Solution</h2>
+<p>Chúng ta sẽ tiếp cận ở góc độ high-level về hệ thống mà chúng ta đang nhắm tới, phân rã nó theo từng scenario và mức growth nhất định.</p>
+<h3 id="basic-system-10-to-100-users">Basic system (10 to 100 users)</h3>
+<p>Hãy bắt đầu với một thiết kế cơ bản nhất của hệ thống chúng ta, một blog dành cho 10 đến 100 users.</p>
+<p><img src="/images/blogs/001/basic.png" alt="Basic system"></p>
+<p>Công việc lúc này là vô cùng đơn giản khi ta có thể setup một self-host server hoặc ở đâu đó trên cloud, và khi user cần truy cập vào trang web của chúng ta, DNS lúc này sẽ vào việc và trả về địa chỉ IP của server, qua đó trả về dữ liệu tương ứng cho user (HTML, CSS, Script, nội dung blog, v.v.).</p>
+<p>Như chúng ta thấy, dữ liệu của system được lưu trữ tại server, có thể là các folder chứa các tệp text, hình ảnh, v.v. Hoặc là một NoSQL database được cấu hình sẵn (<em>sử dụng NoSQL vì dữ liệu của blog có tính semi-structured và tổng dung lượng tăng trưởng dự kiến khoảng 1TB</em>), điều này tiềm ẩn một số rủi ro nhất định, tuy nhiên giải pháp vẫn có thể chấp nhận được với ít chi phí + nỗ lực nhất, và performance ở đây cũng tương tự, có thể chấp nhận được.</p>
+<h3 id="scale-up-to-10000-users--100-to-500-tps">Scale up to 10,000 users &amp; 100 to 500 tps!</h3>
+<p>Lúc này, blog chúng ta đã lớn mạnh, lượng user đã đạt tới con số 10,000 và throughput (thông lượng) cần đáp ứng khoảng 100-500 tps.</p>
+<p>Và đây chính là lúc mà chúng ta thật sự cần quan tâm đến scalability, scale cái gì, scale như thế nào, để đạt được hiệu quả.</p>
+<h4 id="server-scaling">Server Scaling</h4>
+<p>Ban đầu, ta chỉ sử dụng một server duy nhất vì một lí do đơn giản là lượng user chưa nhiều -&gt; số lượng truy vấn phát sinh không nhiều.</p>
+<p>Nhưng hiện tại, lượng user đã tăng trưởng lên gấp 10 -&gt; số lượng truy vấn tăng -&gt; nếu dùng single server thì sẽ tăng khối lượng công việc cho worker (server) -&gt; tăng latency -&gt; giảm performance. Tệ hơn là server có thể bị overload, dẫn đến hỏng hóc -&gt; nguy cơ mất sạch dữ liệu tăng cao.</p>
+<p>Giải pháp ở đây là phải tăng khả năng giải quyết và xử lí công việc của worker, để thuận lợi hơn ta sẽ sử dụng các cloud service để giảm thiểu chi phí bảo trì, bảo dưỡng và vận hành. Tiếp theo đó ta có 2 options để lựa chọn cho việc Server Scaling:</p>
+<ul>
+<li><em>Vertical Scaling</em>: upgrade phần cứng, thêm RAM, RAM và RAM, sử dụng CPU tốc độ cao hơn, etc.</li>
+<li><em>Horizontal Scaling</em>: ta sử dụng thêm các máy server, kết nối chúng lại với nhau và tạo thành một hệ thống distributed.</li>
+</ul>
+<p>Ở đây, mình sẽ lựa chọn giải pháp ở sau, <em>Horizontal Scaling</em>, vì một số lí do chính sau:</p>
+<ul>
+<li>Thường thì sẽ có lợi hơn về mặc chi phí.</li>
+<li>Tạo tiền đề cho việc scale khi tiếp tục tăng trưởng và có nhu cầu.</li>
+<li>Tăng khả năng chịu lỗi của system, hệ thống vẫn có thể hoạt động tiếp tục nếu có 1 vài sự cố xảy ra với một trong các server -&gt; giảm downtime.</li>
+</ul>
+<p><img src="/images/blogs/001/intermediate.png" alt="Scale up level 1"></p>
+<h4 id="database-scaling">Database Scaling</h4>
+<p>Ở góc độ Database, liệu chúng ta có cần phải scailing như cách chúng ta đã làm với Server?</p>
+<p>Well, để trả lời câu hỏi này, chúng ta hãy nhìn lại các câu hỏi đã được nêu ra ở trên. Vì đặc điểm của application (blog), việc tăng trưởng user sẽ không làm tăng số lượng dữ liệu phát sinh tương ứng, mà chỉ làm tăng số lượng transaction giữa client và server, tương đương với việc tăng số lượng truy vấn của server lên database, ngoài ra khối lượng dữ liệu dự đoán là không quá lớn (1TB). Thế nên, ở mức tăng trưởng user này, ta chỉ cần optimize truy vấn và tăng tốc độ truy vấn của server với database. Ở đây mình sẽ sử dụng thêm Cache Layer và cấu hình lại logic truy vấn của server.</p>
           </article>
         </div>
       </div>
@@ -262,7 +289,12 @@ System Design for Blog with Massive Users | Dat N. Stories
   <ul>
     <li><a href="#problem-statement">Problem statement</a></li>
     <li><a href="#analysis">Analysis</a></li>
-    <li><a href="#solution">Solution</a></li>
+    <li><a href="#solution">Solution</a>
+      <ul>
+        <li><a href="#basic-system-10-to-100-users">Basic system (10 to 100 users)</a></li>
+        <li><a href="#scale-up-to-10000-users--100-to-500-tps">Scale up to 10,000 users &amp; 100 to 500 tps!</a></li>
+      </ul>
+    </li>
   </ul>
 </nav>
               </div>
